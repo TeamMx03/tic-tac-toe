@@ -1,0 +1,179 @@
+:root {
+    --primary-color: #ff3a3a;
+    --secondary-color: #2b2b2b;
+    --accent-color: #ffcc00;
+    --dark-color: #1a1a1a;
+    --light-color: #f8f9fa;
+}
+
+body {
+    font-family: 'Orbitron', sans-serif;
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    min-height: 100vh;
+}
+
+.game-title {
+    font-family: 'Russo One', sans-serif;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(255, 58, 58, 0.7);
+    letter-spacing: 2px;
+}
+
+.game-container {
+    background-color: var(--secondary-color);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 58, 58, 0.5);
+    border: 2px solid var(--primary-color);
+    padding: 20px;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    font-size: 3rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: var(--dark-color);
+    border: 2px solid var(--primary-color);
+    color: var(--light-color);
+    transition: all 0.3s;
+    margin: 2px;
+}
+
+.cell:hover {
+    background-color: rgba(255, 58, 58, 0.2);
+    transform: scale(1.05);
+}
+
+.cell.x {
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(255, 58, 58, 0.7);
+}
+
+.cell.o {
+    color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+}
+
+.score-board {
+    background-color: var(--secondary-color);
+    border-radius: 10px;
+    border: 2px solid var(--primary-color);
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.player-score {
+    font-size: 1.2rem;
+}
+
+.player-x {
+    color: var(--primary-color);
+}
+
+.player-o {
+    color: var(--accent-color);
+}
+
+.btn-aggressive {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    border: none;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    margin: 5px;
+    padding: 10px 20px;
+}
+
+.btn-aggressive:hover {
+    background-color: #ff1a1a;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 58, 58, 0.4);
+}
+
+.btn-aggressive:active {
+    transform: translateY(0);
+}
+
+.btn-accent {
+    background-color: var(--accent-color);
+    color: var(--dark-color);
+    border: none;
+    font-weight: bold;
+}
+
+.btn-accent:hover {
+    background-color: #e6b800;
+}
+
+.modal-content {
+    background-color: var(--secondary-color);
+    border: 2px solid var(--primary-color);
+    color: var(--light-color);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--primary-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--primary-color);
+}
+
+.winner-animation {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.difficulty-badge {
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 0.8rem;
+}
+
+#onlineLink {
+    background-color: var(--dark-color);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    font-family: monospace;
+    padding: 10px;
+}
+
+#gameStatus {
+    font-size: 1.5rem;
+    margin: 15px 0;
+    min-height: 2.5rem;
+}
+
+.online-status {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+@media (max-width: 576px) {
+    .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+    }
+    
+    .game-title {
+        font-size: 1.8rem;
+    }
+    
+    .btn-aggressive {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}
