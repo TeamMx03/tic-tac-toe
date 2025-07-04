@@ -34,6 +34,7 @@
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(255, 58, 58, 0.5);
             border: 2px solid var(--primary-color);
+            padding: 20px;
         }
         
         .cell {
@@ -49,6 +50,7 @@
             border: 2px solid var(--primary-color);
             color: var(--light-color);
             transition: all 0.3s;
+            margin: 2px;
         }
         
         .cell:hover {
@@ -58,16 +60,20 @@
         
         .cell.x {
             color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(255, 58, 58, 0.7);
         }
         
         .cell.o {
             color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
         }
         
         .score-board {
             background-color: var(--secondary-color);
             border-radius: 10px;
             border: 2px solid var(--primary-color);
+            padding: 10px;
+            margin-bottom: 20px;
         }
         
         .player-score {
@@ -90,6 +96,7 @@
             letter-spacing: 1px;
             transition: all 0.3s;
             margin: 5px;
+            padding: 10px 20px;
         }
         
         .btn-aggressive:hover {
@@ -148,6 +155,19 @@
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
             font-family: monospace;
+            padding: 10px;
+        }
+        
+        #gameStatus {
+            font-size: 1.5rem;
+            margin: 15px 0;
+            min-height: 2.5rem;
+        }
+        
+        .online-status {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            margin-top: 10px;
         }
         
         @media (max-width: 576px) {
@@ -160,6 +180,11 @@
             .game-title {
                 font-size: 1.8rem;
             }
+            
+            .btn-aggressive {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -171,8 +196,8 @@
         
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <div class="game-container p-3 p-md-4 mb-4">
-                    <div class="score-board p-3 mb-4">
+                <div class="game-container">
+                    <div class="score-board">
                         <div class="row text-center">
                             <div class="col">
                                 <div class="player-score player-x">Player X: <span id="scoreX">0</span></div>
@@ -204,11 +229,14 @@
                         </div>
                     </div>
                     
-                    <div class="text-center mb-3">
-                        <div id="gameStatus" class="fw-bold mb-3">Player X's turn</div>
-                        <button id="newGameBtn" class="btn btn-aggressive">New Game</button>
-                        <button id="gameModeBtn" class="btn btn-aggressive">VS AI</button>
-                        <button id="onlineGameBtn" class="btn btn-aggressive">Play Online</button>
+                    <div class="text-center">
+                        <div id="gameStatus" class="fw-bold">Player X's turn</div>
+                        <div id="onlineStatus" class="online-status d-none"></div>
+                        <div class="mt-3">
+                            <button id="newGameBtn" class="btn btn-aggressive">New Game</button>
+                            <button id="gameModeBtn" class="btn btn-aggressive">VS Friend</button>
+                            <button id="onlineGameBtn" class="btn btn-aggressive">Play Online</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -259,12 +287,18 @@
                             <button class="btn btn-accent" id="copyLinkBtn">Copy</button>
                         </div>
                         <div class="alert alert-info">
-                            Waiting for opponent to join...
+                            <strong>Waiting for opponent to join...</strong>
+                            <div class="spinner-border spinner-border-sm ms-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
                         </div>
                     </div>
                     <div id="onlineGameInfo" class="d-none">
                         <p>Playing online as: <span id="onlinePlayerSymbol" class="fw-bold">X</span></p>
                         <p>Game ID: <span id="onlineGameId" class="fw-bold">ABCD123</span></p>
+                        <div class="alert alert-success mt-3">
+                            <strong>Game is live!</strong> You're playing against a real opponent.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
