@@ -3,32 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtreme Tic-Tac-Toe</title>
+    <title>Xtreme Tic-Tac-Toe Showdown</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Orbitron:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container py-4">
+    <div class="container-fluid game-bg py-4">
         <div class="text-center mb-4">
-            <h1 class="game-title">XTREME TIC-TAC-TOE</h1>
+            <h1 class="game-title glitch">TIC-TAC-SHOWDOWN</h1>
+            <div class="game-subtitle">ULTIMATE EDITION</div>
         </div>
         
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <div class="game-container">
-                    <div class="score-board">
-                        <div class="row text-center">
-                            <div class="col">
-                                <div class="player-score player-x">Player X: <span id="scoreX">0</span></div>
+                <div class="game-container neon-border">
+                    <div class="player-info">
+                        <div class="player-card player-x">
+                            <div class="avatar" id="playerXAvatar">
+                                <i class="fas fa-user-ninja"></i>
                             </div>
-                            <div class="col">
-                                <div class="player-score">Rounds: <span id="roundCount">1/5</span></div>
-                            </div>
-                            <div class="col">
-                                <div class="player-score player-o">Player O: <span id="scoreO">0</span></div>
-                            </div>
+                            <div class="player-name" id="playerXName">Player X</div>
+                            <div class="player-score"><span id="scoreX">0</span></div>
                         </div>
+                        
+                        <div class="vs-circle">VS</div>
+                        
+                        <div class="player-card player-o">
+                            <div class="avatar" id="playerOAvatar">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <div class="player-name" id="playerOName">Player O</div>
+                            <div class="player-score"><span id="scoreO">0</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="round-counter">
+                        <span id="roundCount">Round 1/5</span>
                     </div>
                     
                     <div class="game-board mb-4">
@@ -49,14 +61,21 @@
                         </div>
                     </div>
                     
-                    <div class="text-center">
-                        <div id="gameStatus" class="fw-bold mb-3">Player X's turn</div>
+                    <div class="game-status">
+                        <div id="gameStatus" class="status-message">Player X's turn</div>
                         <div id="onlineStatus" class="online-status d-none"></div>
-                        <div class="mt-3">
-                            <button id="newGameBtn" class="btn btn-aggressive">New Game</button>
-                            <button id="gameModeBtn" class="btn btn-aggressive">VS Friend</button>
-                            <button id="onlineGameBtn" class="btn btn-aggressive">Play Online</button>
-                        </div>
+                    </div>
+                    
+                    <div class="game-controls">
+                        <button id="newGameBtn" class="btn btn-aggressive pulse">
+                            <i class="fas fa-sync-alt"></i> NEW GAME
+                        </button>
+                        <button id="gameModeBtn" class="btn btn-aggressive">
+                            <i class="fas fa-user-friends"></i> VS FRIEND
+                        </button>
+                        <button id="onlineGameBtn" class="btn btn-aggressive">
+                            <i class="fas fa-globe"></i> ONLINE
+                        </button>
                     </div>
                 </div>
             </div>
@@ -65,25 +84,54 @@
     
     <!-- Game Mode Modal -->
     <div class="modal fade" id="gameModeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content game-modal">
                 <div class="modal-header">
-                    <h5 class="modal-title">Select Game Mode</h5>
+                    <h5 class="modal-title">SELECT BATTLE MODE</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-aggressive mode-btn" data-mode="ai">VS AI</button>
-                        <button class="btn btn-aggressive mode-btn" data-mode="friend">VS Friend</button>
-                        <button class="btn btn-aggressive mode-btn" data-mode="online">Play Online</button>
+                    <div class="mode-selection">
+                        <button class="mode-card mode-btn" data-mode="ai">
+                            <div class="mode-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="mode-title">VS AI</div>
+                            <div class="mode-desc">Challenge the computer</div>
+                        </button>
+                        
+                        <button class="mode-card mode-btn" data-mode="friend">
+                            <div class="mode-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="mode-title">VS FRIEND</div>
+                            <div class="mode-desc">Local multiplayer</div>
+                        </button>
+                        
+                        <button class="mode-card mode-btn" data-mode="online">
+                            <div class="mode-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="mode-title">ONLINE SHOWDOWN</div>
+                            <div class="mode-desc">Real-time battle</div>
+                        </button>
                     </div>
                     
-                    <div id="aiDifficulty" class="mt-3 d-none">
-                        <h6>Select AI Difficulty:</h6>
-                        <div class="d-flex justify-content-between mt-2">
-                            <button class="btn btn-sm btn-aggressive difficulty-btn" data-difficulty="easy">Easy <span class="badge difficulty-badge">50%</span></button>
-                            <button class="btn btn-sm btn-aggressive difficulty-btn" data-difficulty="medium">Medium <span class="badge difficulty-badge">75%</span></button>
-                            <button class="btn btn-sm btn-aggressive difficulty-btn active" data-difficulty="hard">Hard <span class="badge difficulty-badge">100%</span></button>
+                    <div id="aiDifficulty" class="difficulty-selection d-none">
+                        <h6>SELECT AI DIFFICULTY:</h6>
+                        <div class="difficulty-levels">
+                            <button class="difficulty-btn" data-difficulty="easy">
+                                <span class="difficulty-name">ROOKIE</span>
+                                <span class="difficulty-badge">50%</span>
+                            </button>
+                            <button class="difficulty-btn" data-difficulty="medium">
+                                <span class="difficulty-name">VETERAN</span>
+                                <span class="difficulty-badge">75%</span>
+                            </button>
+                            <button class="difficulty-btn active" data-difficulty="hard">
+                                <span class="difficulty-name">LEGEND</span>
+                                <span class="difficulty-badge">100%</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -93,36 +141,87 @@
     
     <!-- Online Game Modal -->
     <div class="modal fade" id="onlineGameModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content game-modal">
                 <div class="modal-header">
-                    <h5 class="modal-title">Play Online</h5>
+                    <h5 class="modal-title">ONLINE SHOWDOWN</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div id="onlineSetup">
-                        <p>Share this link with a friend to play together:</p>
+                        <div class="online-avatar-selection">
+                            <div class="avatar-option selected" data-avatar="ninja">
+                                <i class="fas fa-user-ninja"></i>
+                            </div>
+                            <div class="avatar-option" data-avatar="astronaut">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <div class="avatar-option" data-avatar="pirate">
+                                <i class="fas fa-user-pirate"></i>
+                            </div>
+                            <div class="avatar-option" data-avatar="secret">
+                                <i class="fas fa-user-secret"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="playerName">YOUR NAME:</label>
+                            <input type="text" id="playerName" class="form-control" placeholder="Enter your name" maxlength="12">
+                        </div>
+                        
+                        <p class="mt-3">Share this battle link with your opponent:</p>
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" id="onlineLink" readonly>
-                            <button class="btn btn-accent" id="copyLinkBtn">Copy</button>
+                            <button class="btn btn-accent" id="copyLinkBtn">
+                                <i class="fas fa-copy"></i> COPY
+                            </button>
                         </div>
                         <div class="alert alert-info">
-                            <strong>Waiting for opponent to join...</strong>
-                            <div class="spinner-border spinner-border-sm ms-2" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                <strong>WAITING FOR OPPONENT...</strong>
                             </div>
                         </div>
                     </div>
                     <div id="onlineGameInfo" class="d-none">
-                        <p>Playing online as: <span id="onlinePlayerSymbol" class="fw-bold">X</span></p>
-                        <p>Game ID: <span id="onlineGameId" class="fw-bold">ABCD123</span></p>
+                        <div class="online-players">
+                            <div class="online-player">
+                                <div class="player-avatar" id="onlinePlayerXAvatar">
+                                    <i class="fas fa-user-ninja"></i>
+                                </div>
+                                <div class="player-details">
+                                    <div class="player-name" id="onlinePlayerXName">Player X</div>
+                                    <div class="player-status">READY</div>
+                                </div>
+                            </div>
+                            
+                            <div class="vs-circle">VS</div>
+                            
+                            <div class="online-player">
+                                <div class="player-avatar" id="onlinePlayerOAvatar">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                                <div class="player-details">
+                                    <div class="player-name" id="onlinePlayerOName">Waiting...</div>
+                                    <div class="player-status">CONNECTING</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="game-id-display">
+                            <span>BATTLE ID:</span>
+                            <strong id="onlineGameId">ABCD123</strong>
+                        </div>
+                        
                         <div class="alert alert-success mt-3">
-                            <strong>Game is live!</strong> You're playing against a real opponent.
+                            <i class="fas fa-bolt"></i> <strong>BATTLE STARTED!</strong> May the best warrior win!
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-aggressive" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-aggressive" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> CLOSE
+                    </button>
                 </div>
             </div>
         </div>
@@ -130,23 +229,55 @@
     
     <!-- Game Over Modal -->
     <div class="modal fade" id="gameOverModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content game-modal">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="gameOverTitle">Game Over</h5>
+                    <h5 class="modal-title" id="gameOverTitle">BATTLE RESULTS</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <h4 id="gameOverMessage" class="mb-4">Player X wins!</h4>
-                    <div class="mb-3">
-                        <span class="player-x">Player X: <span id="finalScoreX">0</span></span> | 
-                        <span class="player-o">Player O: <span id="finalScoreO">0</span></span>
+                    <div id="winnerCelebration" class="d-none">
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="winner-avatar">
+                            <i class="fas fa-crown"></i>
+                            <div id="winnerAvatar"></div>
+                        </div>
+                        <h4 id="gameOverMessage" class="winner-message">PLAYER X WINS!</h4>
                     </div>
-                    <div id="roundWinnerMessage" class="fw-bold mb-3"></div>
-                    <div id="gameWinnerMessage" class="fw-bold fs-4 winner-animation d-none"></div>
+                    
+                    <div id="drawCelebration" class="d-none">
+                        <div class="trophy">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h4 class="draw-message">IT'S A DRAW!</h4>
+                    </div>
+                    
+                    <div class="score-summary">
+                        <div class="final-scores">
+                            <div class="final-score player-x">
+                                <span id="finalScoreX">0</span>
+                                <span>X</span>
+                            </div>
+                            <div class="final-score player-o">
+                                <span id="finalScoreO">0</span>
+                                <span>O</span>
+                            </div>
+                        </div>
+                        <div id="roundWinnerMessage" class="round-result"></div>
+                    </div>
+                    
+                    <div id="gameWinnerMessage" class="champion-message d-none">
+                        <i class="fas fa-trophy"></i> <span id="championName"></span> IS THE ULTIMATE CHAMPION!
+                    </div>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-aggressive" data-bs-dismiss="modal">Continue</button>
+                    <button type="button" class="btn btn-aggressive" data-bs-dismiss="modal">
+                        <i class="fas fa-redo"></i> CONTINUE
+                    </button>
                 </div>
             </div>
         </div>
