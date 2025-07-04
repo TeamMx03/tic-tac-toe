@@ -31,7 +31,11 @@ let gameState = {
     playerSymbol: null,
     opponentJoined: false,
     isHost: false,
-    gameRef: null
+    gameRef: null,
+    playerName: 'Player',
+    playerAvatar: 'ninja',
+    opponentName: 'Opponent',
+    opponentAvatar: 'astronaut'
   }
 };
 
@@ -54,6 +58,16 @@ const onlinePlayerSymbolElement = document.getElementById('onlinePlayerSymbol');
 const onlineGameIdElement = document.getElementById('onlineGameId');
 const onlineSetupSection = document.getElementById('onlineSetup');
 const onlineGameInfoSection = document.getElementById('onlineGameInfo');
+const playerNameInput = document.getElementById('playerName');
+const avatarOptions = document.querySelectorAll('.avatar-option');
+const playerXAvatar = document.getElementById('playerXAvatar');
+const playerOAvatar = document.getElementById('playerOAvatar');
+const playerXName = document.getElementById('playerXName');
+const playerOName = document.getElementById('playerOName');
+const onlinePlayerXAvatar = document.getElementById('onlinePlayerXAvatar');
+const onlinePlayerOAvatar = document.getElementById('onlinePlayerOAvatar');
+const onlinePlayerXName = document.getElementById('onlinePlayerXName');
+const onlinePlayerOName = document.getElementById('onlinePlayerOName');
 
 // Modals
 const gameModeModal = new bootstrap.Modal(document.getElementById('gameModeModal'));
@@ -67,6 +81,7 @@ function initGame() {
   gameState.gameOver = false;
   updateBoard();
   updateGameStatus();
+  updatePlayerDisplay();
 }
 
 // Update the board UI
@@ -79,7 +94,23 @@ function updateBoard() {
     } else if (gameState.board[index] === 'O') {
       cell.classList.add('o');
     }
+    
+    // Remove winner class from all cells
+    cell.classList.remove('winner-cell');
   });
+  
+  // Highlight winning cells if game is over
+  if (gameState.gameOver) {
+    const winner = checkWinner();
+    if (winner && winner !== 'draw') {
+      const winPattern = getWinningPattern();
+      if (winPattern) {
+        winPattern.forEach(index => {
+          cells[index].classList.add('winner-cell');
+        });
+      }
+    }
+  }
 }
 
 // Update game status text
@@ -87,15 +118,15 @@ function updateGameStatus() {
   if (gameState.gameOver) {
     const winner = checkWinner();
     if (winner) {
-      gameStatusElement.textContent = `Player ${winner} wins!`;
+      gameStatusElement.textContent = `${winner === 'X' ? gameState.online.playerXName || 'Player X' : gameState.online.playerOName || 'Player O'} WINS!`;
     } else {
-      gameStatusElement.textContent = "It's a draw!";
+      gameStatusElement.textContent = "IT'S A DRAW!";
     }
   } else {
-    gameStatusElement.textContent = `Player ${gameState.currentPlayer}'s turn`;
+    gameStatusElement.textContent = `${gameState.currentPlayer === 'X' ? gameState.online.playerXName || 'Player X' : gameState.online.playerOName || 'Player O'}'s TURN`;
   }
   
-  roundCountElement.textContent = `${gameState.round}/${gameState.maxRounds}`;
+  roundCountElement.textContent = `ROUND ${gameState.round}/${gameState.maxRounds}`;
   scoreXElement.textContent = gameState.scores.X;
   scoreOElement.textContent = gameState.scores.O;
   
@@ -103,17 +134,46 @@ function updateGameStatus() {
   if (gameState.gameMode === 'online') {
     onlineStatusElement.classList.remove('d-none');
     if (gameState.online.opponentJoined) {
-      onlineStatusElement.textContent = `Playing as ${gameState.online.playerSymbol}`;
+      onlineStatusElement.textContent = `PLAYING AS ${gameState.online.playerSymbol}`;
     } else {
-      onlineStatusElement.textContent = "Waiting for opponent...";
+      onlineStatusElement.textContent = "WAITING FOR OPPONENT...";
     }
   } else {
     onlineStatusElement.classList.add('d-none');
   }
 }
 
-// Check for a winner
-function checkWinner() {
+// Update player display
+function updatePlayerDisplay() {
+  if (gameState.gameMode === 'online') {
+    playerXName.textContent = gameState.online.isHost ? gameState.online.playerName : gameState.online.opponentName;
+    playerOName.textContent = gameState.online.isHost ? gameState.online.opponentName : gameState.online.playerName;
+    
+    // Set avatars
+    const xAvatar = gameState.online.isHost ? gameState.online.playerAvatar : gameState.online.opponentAvatar;
+    const oAvatar = gameState.online.isHost ? gameState.online.opponentAvatar : gameState.online.playerAvatar;
+    
+    playerXAvatar.innerHTML = `<i class="fas fa-user-${xAvatar}"></i>`;
+    playerOAvatar.innerHTML = `<i class="fas fa-user-${oAvatar}"></i>`;
+    
+    // Update online modal display
+    onlinePlayerXName.textContent = gameState.online.playerXName || 'Player X';
+    onlinePlayerOName.textContent = gameState.online.opponentJoined ? (gameState.online.playerOName || 'Player O') : 'Waiting...';
+    
+    onlinePlayerXAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.playerAvatar}"></i>`;
+    if (gameState.online.opponentJoined) {
+      onlinePlayerOAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.opponentAvatar}"></i>`;
+    }
+  } else {
+    playerXName.textContent = 'Player X';
+    playerOName.textContent = 'Player O';
+    playerXAvatar.innerHTML = '<i class="fas fa-user-ninja"></i>';
+    playerOAvatar.innerHTML = '<i class="fas fa-user-astronaut"></i>';
+  }
+}
+
+// Check for a winner and return the winning pattern
+function getWinningPattern() {
   const winPatterns = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
     [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
@@ -123,11 +183,17 @@ function checkWinner() {
   for (const pattern of winPatterns) {
     const [a, b, c] = pattern;
     if (gameState.board[a] && gameState.board[a] === gameState.board[b] && gameState.board[a] === gameState.board[c]) {
-      return gameState.board[a];
+      return pattern;
     }
   }
 
-  return gameState.board.includes('') ? null : 'draw';
+  return null;
+}
+
+// Check for a winner
+function checkWinner() {
+  return getWinningPattern() ? gameState.board[getWinningPattern()[0]] : 
+         gameState.board.includes('') ? null : 'draw';
 }
 
 // Handle cell click
@@ -190,14 +256,29 @@ function handleGameOver(winner) {
   document.getElementById('finalScoreX').textContent = gameState.scores.X;
   document.getElementById('finalScoreO').textContent = gameState.scores.O;
   
+  const winnerCelebration = document.getElementById('winnerCelebration');
+  const drawCelebration = document.getElementById('drawCelebration');
+  
   if (winner !== 'draw') {
-    document.getElementById('gameOverTitle').textContent = 'Round Over';
-    document.getElementById('gameOverMessage').textContent = `Player ${winner} wins this round!`;
-    document.getElementById('roundWinnerMessage').textContent = `Player ${winner} wins round ${gameState.round}`;
+    document.getElementById('gameOverTitle').textContent = 'BATTLE RESULTS';
+    document.getElementById('gameOverMessage').textContent = `${winner === 'X' ? gameState.online.playerXName || 'PLAYER X' : gameState.online.playerOName || 'PLAYER O'} WINS!`;
+    document.getElementById('roundWinnerMessage').textContent = `ROUND ${gameState.round} VICTORY`;
+    
+    // Set winner avatar
+    const winnerAvatar = document.getElementById('winnerAvatar');
+    if (winner === 'X') {
+      winnerAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.isHost ? gameState.online.playerAvatar : gameState.online.opponentAvatar}"></i>`;
+    } else {
+      winnerAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.isHost ? gameState.online.opponentAvatar : gameState.online.playerAvatar}"></i>`;
+    }
+    
+    winnerCelebration.classList.remove('d-none');
+    drawCelebration.classList.add('d-none');
   } else {
-    document.getElementById('gameOverTitle').textContent = 'Round Over';
-    document.getElementById('gameOverMessage').textContent = "It's a draw!";
-    document.getElementById('roundWinnerMessage').textContent = `Round ${gameState.round} ended in a draw`;
+    document.getElementById('gameOverTitle').textContent = 'BATTLE RESULTS';
+    document.getElementById('roundWinnerMessage').textContent = `ROUND ${gameState.round} ENDED IN A DRAW`;
+    winnerCelebration.classList.add('d-none');
+    drawCelebration.classList.remove('d-none');
   }
   
   // Check if game is completely over (3 wins)
@@ -206,11 +287,11 @@ function handleGameOver(winner) {
                       gameState.scores.O > gameState.scores.X ? 'O' : 'draw';
     
     if (gameWinner !== 'draw') {
-      document.getElementById('gameWinnerMessage').textContent = `Player ${gameWinner} wins the game!`;
-      document.getElementById('gameWinnerMessage').classList.remove('d-none');
-    } else {
-      document.getElementById('gameWinnerMessage').textContent = `Game ended in a draw!`;
-      document.getElementById('gameWinnerMessage').classList.remove('d-none');
+      const championMessage = document.getElementById('gameWinnerMessage');
+      championMessage.classList.remove('d-none');
+      document.getElementById('championName').textContent = gameWinner === 'X' ? 
+        (gameState.online.playerXName || 'PLAYER X') : 
+        (gameState.online.playerOName || 'PLAYER O');
     }
   } else {
     document.getElementById('gameWinnerMessage').classList.add('d-none');
@@ -359,71 +440,61 @@ function minimax(board, depth, isMaximizing) {
 
 // Online game functions
 function startOnlineGame() {
+  // Get player name and avatar
+  const playerName = playerNameInput.value.trim() || 'Player';
+  const selectedAvatar = document.querySelector('.avatar-option.selected').getAttribute('data-avatar');
+  
   // Generate a random game ID
   const gameId = generateGameId();
-  gameState.online.gameId = gameId;
-  gameState.online.playerSymbol = 'X';
-  gameState.online.opponentJoined = false;
-  gameState.online.isHost = true;
+  
+  // Update game state
+  gameState.online = {
+    gameId,
+    playerSymbol: 'X',
+    opponentJoined: false,
+    isHost: true,
+    playerName,
+    playerAvatar: selectedAvatar,
+    opponentName: 'Opponent',
+    opponentAvatar: 'astronaut',
+    playerXName: playerName,
+    playerOName: 'Waiting...',
+    gameRef: database.ref(`games/${gameId}`)
+  };
+  
   gameState.gameMode = 'online';
+  updatePlayerDisplay();
   
   // Create game in Firebase
-  const gameRef = database.ref(`games/${gameId}`);
-  gameState.online.gameRef = gameRef;
-  
-  gameRef.set({
+  gameState.online.gameRef.set({
     board: gameState.board,
     currentPlayer: 'X',
     playerX: true,
     playerO: false,
     scores: gameState.scores,
     round: gameState.round,
+    playerXName: playerName,
+    playerXAvatar: selectedAvatar,
+    playerOName: '',
+    playerOAvatar: '',
     lastUpdated: Date.now()
   }).then(() => {
     console.log('Game created successfully');
     
     // Set up listener for game changes
-    gameRef.on('value', (snapshot) => {
-      const onlineGame = snapshot.val();
-      if (!onlineGame) return;
-      
-      console.log('Game update received:', onlineGame);
-      
-      // Check if opponent joined
-      if (!gameState.online.opponentJoined && onlineGame.playerO) {
-        gameState.online.opponentJoined = true;
-        onlineSetupSection.classList.add('d-none');
-        onlineGameInfoSection.classList.remove('d-none');
-      }
-      
-      // Update game state
-      gameState.board = [...onlineGame.board];
-      gameState.currentPlayer = onlineGame.currentPlayer;
-      gameState.scores = { ...onlineGame.scores };
-      gameState.round = onlineGame.round;
-      gameState.gameOver = false;
-      
-      updateBoard();
-      updateGameStatus();
-      
-      // Check for winner
-      const winner = checkWinner();
-      if (winner) {
-        handleGameOver(winner);
-      }
-    });
+    setupGameListener();
     
     // Show online game modal
     const gameLink = `${window.location.origin}${window.location.pathname}?game=${gameId}`;
     onlineLinkInput.value = gameLink;
-    onlinePlayerSymbolElement.textContent = 'X';
     onlineGameIdElement.textContent = gameId;
     onlineSetupSection.classList.remove('d-none');
     onlineGameInfoSection.classList.add('d-none');
     onlineGameModal.show();
     
     // Update UI
-    gameModeBtn.textContent = 'Online Game';
+    gameModeBtn.textContent = 'ONLINE';
+    gameModeBtn.innerHTML = '<i class="fas fa-globe"></i> ONLINE';
     updateGameStatus();
   }).catch((error) => {
     console.error('Error creating game:', error);
@@ -433,17 +504,26 @@ function startOnlineGame() {
 
 function joinOnlineGame(gameId) {
   console.log('Attempting to join game:', gameId);
-  gameState.online.gameId = gameId;
-  gameState.online.playerSymbol = 'O';
-  gameState.online.opponentJoined = true;
-  gameState.online.isHost = false;
+  
+  // Get player name and avatar
+  const playerName = playerNameInput.value.trim() || 'Player';
+  const selectedAvatar = document.querySelector('.avatar-option.selected').getAttribute('data-avatar');
+  
+  // Update game state
+  gameState.online = {
+    gameId,
+    playerSymbol: 'O',
+    opponentJoined: true,
+    isHost: false,
+    playerName,
+    playerAvatar: selectedAvatar,
+    gameRef: database.ref(`games/${gameId}`)
+  };
+  
   gameState.gameMode = 'online';
   
-  const gameRef = database.ref(`games/${gameId}`);
-  gameState.online.gameRef = gameRef;
-  
   // First check if game exists and has space
-  gameRef.once('value').then((snapshot) => {
+  gameState.online.gameRef.once('value').then((snapshot) => {
     const game = snapshot.val();
     if (!game) {
       alert('Game not found');
@@ -457,47 +537,36 @@ function joinOnlineGame(gameId) {
       return;
     }
     
+    // Update opponent info
+    gameState.online.opponentName = game.playerXName || 'Player X';
+    gameState.online.opponentAvatar = game.playerXAvatar || 'ninja';
+    gameState.online.playerXName = game.playerXName;
+    gameState.online.playerOName = playerName;
+    
+    updatePlayerDisplay();
+    
     // Update game to mark player O as joined
-    return gameRef.update({ 
+    return gameState.online.gameRef.update({ 
       playerO: true,
+      playerOName: playerName,
+      playerOAvatar: selectedAvatar,
       lastUpdated: Date.now()
     });
   }).then(() => {
     console.log('Successfully joined game as player O');
     
     // Set up listener for game changes
-    gameRef.on('value', (snapshot) => {
-      const onlineGame = snapshot.val();
-      if (!onlineGame) return;
-      
-      console.log('Game update received:', onlineGame);
-      
-      // Update game state
-      gameState.board = [...onlineGame.board];
-      gameState.currentPlayer = onlineGame.currentPlayer;
-      gameState.scores = { ...onlineGame.scores };
-      gameState.round = onlineGame.round;
-      gameState.gameOver = false;
-      
-      updateBoard();
-      updateGameStatus();
-      
-      // Check for winner
-      const winner = checkWinner();
-      if (winner) {
-        handleGameOver(winner);
-      }
-    });
+    setupGameListener();
     
     // Show online game info
-    onlinePlayerSymbolElement.textContent = 'O';
     onlineGameIdElement.textContent = gameId;
     onlineSetupSection.classList.add('d-none');
     onlineGameInfoSection.classList.remove('d-none');
     onlineGameModal.show();
     
     // Update UI
-    gameModeBtn.textContent = 'Online Game';
+    gameModeBtn.textContent = 'ONLINE';
+    gameModeBtn.innerHTML = '<i class="fas fa-globe"></i> ONLINE';
     updateGameStatus();
   }).catch((error) => {
     console.error('Error joining game:', error);
@@ -506,16 +575,67 @@ function joinOnlineGame(gameId) {
   });
 }
 
+function setupGameListener() {
+  gameState.online.gameRef.on('value', snapshot => {
+    const onlineGame = snapshot.val();
+    if (!onlineGame) return;
+    
+    console.log('Game update received:', onlineGame);
+    
+    // Update opponent info if we're the host
+    if (gameState.online.isHost && onlineGame.playerO) {
+      gameState.online.opponentName = onlineGame.playerOName || 'Player O';
+      gameState.online.opponentAvatar = onlineGame.playerOAvatar || 'astronaut';
+      gameState.online.playerOName = onlineGame.playerOName;
+      
+      if (!gameState.online.opponentJoined) {
+        gameState.online.opponentJoined = true;
+        document.getElementById('onlineSetup').classList.add('d-none');
+        document.getElementById('onlineGameInfo').classList.remove('d-none');
+        document.querySelector('.player-status').textContent = 'READY';
+      }
+    }
+    
+    // Update game state from Firebase
+    gameState.board = [...onlineGame.board];
+    gameState.currentPlayer = onlineGame.currentPlayer;
+    gameState.scores = { ...onlineGame.scores };
+    gameState.round = onlineGame.round;
+    gameState.gameOver = false;
+    
+    updateBoard();
+    updateGameStatus();
+    updatePlayerDisplay();
+    
+    // Check for winner
+    const winner = checkWinner();
+    if (winner) {
+      handleGameOver(winner);
+    }
+  });
+}
+
 function updateOnlineGame() {
   if (!gameState.online.gameRef) return;
   
-  gameState.online.gameRef.update({
+  const updateData = {
     board: gameState.board,
     currentPlayer: gameState.currentPlayer,
     scores: gameState.scores,
     round: gameState.round,
     lastUpdated: Date.now()
-  }).catch((error) => {
+  };
+  
+  // If we're the host, also update player names
+  if (gameState.online.isHost) {
+    updateData.playerXName = gameState.online.playerName;
+    updateData.playerXAvatar = gameState.online.playerAvatar;
+  } else {
+    updateData.playerOName = gameState.online.playerName;
+    updateData.playerOAvatar = gameState.online.playerAvatar;
+  }
+  
+  gameState.online.gameRef.update(updateData).catch((error) => {
     console.error('Error updating game:', error);
   });
 }
@@ -530,77 +650,125 @@ function checkUrlForGame() {
   const gameId = urlParams.get('game');
   
   if (gameId && !gameState.online.gameId) {
+    // Show online setup modal
+    onlineGameModal.show();
+    
     database.ref(`games/${gameId}`).once('value').then((snapshot) => {
       if (snapshot.exists()) {
         const game = snapshot.val();
         if (!game.playerO) {
-          joinOnlineGame(gameId);
+          // Game exists and has space, ready to join
+          document.getElementById('onlineSetup').classList.remove('d-none');
+          document.getElementById('onlineGameInfo').classList.add('d-none');
         } else {
           alert('This game already has two players.');
-          window.location.href = window.location.href.split('?')[0];
+          window.location.href = window.location.pathname;
         }
       } else {
         alert('Game not found.');
-        window.location.href = window.location.href.split('?')[0];
+        window.location.href = window.location.pathname;
       }
     });
   }
 }
 
-// Event handlers
-function handleNewGame() {
-  if (gameState.round >= gameState.maxRounds || gameState.scores.X >= 3 || gameState.scores.O >= 3) {
-    resetGame();
-  } else {
-    startNewRound();
-  }
-}
-
-function handleOnlineButton() {
-  if (gameState.gameMode === 'online') {
-    onlineGameModal.show();
-  } else {
-    startOnlineGame();
-  }
-}
-
-function handleModeSelection(e) {
-  gameState.gameMode = e.target.getAttribute('data-mode');
-  gameModeBtn.textContent = e.target.textContent;
+// Event listeners
+function setupEventListeners() {
+  // Cell clicks
+  cells.forEach(cell => {
+    cell.addEventListener('click', handleCellClick);
+  });
   
-  if (gameState.gameMode === 'ai') {
-    aiDifficultySection.classList.remove('d-none');
-  } else {
-    aiDifficultySection.classList.add('d-none');
-  }
+  // New game button
+  newGameBtn.addEventListener('click', () => {
+    if (gameState.round >= gameState.maxRounds || gameState.scores.X >= 3 || gameState.scores.O >= 3) {
+      resetGame();
+    } else {
+      startNewRound();
+    }
+  });
   
-  resetGame();
-  gameModeModal.hide();
-}
-
-function handleDifficultySelection(e) {
-  difficultyButtons.forEach(btn => btn.classList.remove('active'));
-  e.target.classList.add('active');
-  gameState.aiDifficulty = e.target.getAttribute('data-difficulty');
-}
-
-function copyGameLink() {
-  onlineLinkInput.select();
-  document.execCommand('copy');
-  copyLinkBtn.textContent = 'Copied!';
-  setTimeout(() => {
-    copyLinkBtn.textContent = 'Copy';
-  }, 2000);
-}
-
-function handleModalClose() {
-  if (gameState.round >= gameState.maxRounds || gameState.scores.X >= 3 || gameState.scores.O >= 3) {
-    resetGame();
-  } else {
-    startNewRound();
-  }
+  // Game mode button
+  gameModeBtn.addEventListener('click', () => {
+    gameModeModal.show();
+  });
+  
+  // Online game button
+  onlineGameBtn.addEventListener('click', () => {
+    if (gameState.gameMode === 'online') {
+      onlineGameModal.show();
+    } else {
+      // Show player name and avatar selection
+      playerNameInput.value = '';
+      document.querySelector('.avatar-option').classList.add('selected');
+      document.querySelectorAll('.avatar-option:not(:first-child)').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      onlineGameModal.show();
+    }
+  });
+  
+  // Mode selection
+  modeButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      gameState.gameMode = e.currentTarget.getAttribute('data-mode');
+      gameModeBtn.textContent = e.currentTarget.querySelector('.mode-title').textContent;
+      gameModeBtn.innerHTML = `<i class="fas ${e.currentTarget.querySelector('.mode-icon i').className.split(' ')[1]}"></i> ${e.currentTarget.querySelector('.mode-title').textContent.toUpperCase()}`;
+      
+      if (gameState.gameMode === 'ai') {
+        aiDifficultySection.classList.remove('d-none');
+      } else {
+        aiDifficultySection.classList.add('d-none');
+      }
+      
+      resetGame();
+      gameModeModal.hide();
+    });
+  });
+  
+  // Difficulty selection
+  difficultyButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      difficultyButtons.forEach(btn => btn.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      gameState.aiDifficulty = e.currentTarget.getAttribute('data-difficulty');
+    });
+  });
+  
+  // Avatar selection
+  avatarOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+      avatarOptions.forEach(opt => opt.classList.remove('selected'));
+      e.currentTarget.classList.add('selected');
+    });
+  });
+  
+  // Copy link button
+  copyLinkBtn.addEventListener('click', () => {
+    onlineLinkInput.select();
+    document.execCommand('copy');
+    copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> COPIED!';
+    setTimeout(() => {
+      copyLinkBtn.innerHTML = '<i class="fas fa-copy"></i> COPY';
+    }, 2000);
+  });
+  
+  // Game over modal close
+  gameOverModal._element.addEventListener('hidden.bs.modal', () => {
+    if (gameState.round >= gameState.maxRounds || gameState.scores.X >= 3 || gameState.scores.O >= 3) {
+      resetGame();
+    } else {
+      startNewRound();
+    }
+  });
 }
 
 // Initialize the game
-initGame();
-checkUrlForGame();
+function init() {
+  initGame();
+  setupEventListeners();
+  checkUrlForGame();
+}
+
+// Start the game when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
