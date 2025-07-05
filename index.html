@@ -7,7 +7,907 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Orbitron:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #ff2d75;
+            --secondary-color: #1a1a2e;
+            --accent-color: #00f5d4;
+            --dark-color: #0d0d1a;
+            --light-color: #f8f9fa;
+            --neon-pink: #ff2d75;
+            --neon-blue: #00f5d4;
+            --neon-purple: #9d4edd;
+            --neon-yellow: #fee440;
+        }
+        
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 45, 117, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 245, 212, 0.1) 0%, transparent 20%);
+        }
+        
+        .game-title {
+            font-family: 'Bungee', cursive;
+            color: var(--neon-pink);
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px var(--neon-pink),
+                0 0 20px var(--neon-pink);
+            letter-spacing: 3px;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            animation: glow 2s infinite alternate;
+        }
+        
+        .game-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--neon-blue);
+            letter-spacing: 5px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .game-container {
+            background-color: var(--secondary-color);
+            border-radius: 15px;
+            box-shadow: 
+                0 0 10px rgba(255, 45, 117, 0.3),
+                0 0 20px rgba(0, 245, 212, 0.3);
+            border: 2px solid var(--neon-pink);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .neon-border {
+            position: relative;
+        }
+        
+        .neon-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 17px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-blue), var(--neon-purple));
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+            background-size: 200% 200%;
+        }
+        
+        .neon-border::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            background: var(--secondary-color);
+            z-index: -1;
+        }
+        
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .player-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 20px;
+            border-radius: 10px;
+            width: 45%;
+            transition: all 0.3s;
+        }
+        
+        .player-card.player-x {
+            background: rgba(255, 45, 117, 0.1);
+            border: 1px solid var(--neon-pink);
+        }
+        
+        .player-card.player-o {
+            background: rgba(0, 245, 212, 0.1);
+            border: 1px solid var(--neon-blue);
+        }
+        
+        .player-card.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid currentColor;
+        }
+        
+        .player-x .avatar {
+            color: var(--neon-pink);
+            border-color: var(--neon-pink);
+        }
+        
+        .player-o .avatar {
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+        }
+        
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        
+        .player-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .player-x .player-score {
+            color: var(--neon-pink);
+        }
+        
+        .player-o .player-score {
+            color: var(--neon-blue);
+        }
+        
+        .vs-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--neon-purple);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+        
+        .game-board {
+            margin-bottom: 20px;
+        }
+        
+        .cell {
+            width: 100px;
+            height: 100px;
+            font-size: 3rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: rgba(10, 10, 20, 0.5);
+            color: var(--light-color);
+            transition: all 0.3s;
+            margin: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .cell.x {
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+        
+        .cell.o {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .cell.winner-cell {
+            animation: winnerPulse 1s infinite;
+        }
+        
+        .game-status {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .status-message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 5px var(--neon-yellow);
+            min-height: 2.5rem;
+        }
+        
+        .online-status {
+            color: var(--neon-blue);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-aggressive {
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple));
+            color: white;
+            border: none;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 0 10px rgba(255, 45, 117, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-aggressive:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 45, 117, 0.7);
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
+        }
+        
+        .btn-aggressive:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-aggressive i {
+            font-size: 1rem;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .btn-accent {
+            background: var(--neon-blue);
+            color: var(--dark-color);
+            font-weight: bold;
+        }
+        
+        .btn-accent:hover {
+            background: #00d4b8;
+            color: var(--dark-color);
+        }
+        
+        .round-counter {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 5px var(--neon-yellow);
+            font-weight: bold;
+        }
+        
+        .game-modal {
+            background: var(--secondary-color);
+            border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 20px var(--neon-pink);
+            color: var(--light-color);
+        }
+        
+        .game-modal .modal-header {
+            border-bottom: 1px solid var(--neon-pink);
+        }
+        
+        .game-modal .modal-header .modal-title {
+            color: var(--neon-blue);
+            font-family: 'Bungee', cursive;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .game-modal .modal-footer {
+            border-top: 1px solid var(--neon-pink);
+        }
+        
+        .mode-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-card {
+            background: rgba(30, 30, 60, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 245, 212, 0.3);
+            border-color: var(--neon-blue);
+        }
+        
+        .mode-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--neon-blue);
+        }
+        
+        .mode-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--neon-pink);
+        }
+        
+        .mode-desc {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .difficulty-selection {
+            margin-top: 20px;
+        }
+        
+        .difficulty-selection h6 {
+            color: var(--neon-yellow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .difficulty-levels {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .difficulty-btn {
+            background: rgba(30, 30, 60, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .difficulty-btn.active {
+            background: var(--neon-purple);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+        
+        .difficulty-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .difficulty-badge {
+            background: var(--neon-pink);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
+        
+        .online-avatar-selection {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .avatar-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .avatar-option.selected {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            transform: scale(1.1);
+        }
+        
+        .avatar-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+        
+        .form-control {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--neon-pink);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+        
+        .online-players {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .online-player {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            width: 45%;
+        }
+        
+        .online-player:first-child {
+            background: rgba(255, 45, 117, 0.1);
+            border: 1px solid var(--neon-pink);
+        }
+        
+        .online-player:last-child {
+            background: rgba(0, 245, 212, 0.1);
+            border: 1px solid var(--neon-blue);
+        }
+        
+        .player-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .online-player:first-child .player-avatar {
+            color: var(--neon-pink);
+            border: 2px solid var(--neon-pink);
+        }
+        
+        .online-player:last-child .player-avatar {
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+        }
+        
+        .player-details {
+            flex: 1;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+        
+        .player-status {
+            font-size: 0.8rem;
+            color: var(--neon-yellow);
+        }
+        
+        .game-id-display {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--neon-purple);
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+        
+        .game-id-display span {
+            color: var(--neon-blue);
+            margin-right: 10px;
+        }
+        
+        .game-id-display strong {
+            color: var(--neon-yellow);
+            letter-spacing: 2px;
+        }
+        
+        #winnerCelebration, #drawCelebration {
+            margin-bottom: 30px;
+        }
+        
+        .winner-avatar {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+        }
+        
+        .winner-avatar i {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: var(--neon-yellow);
+            z-index: 2;
+        }
+        
+        .winner-avatar div {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid var(--neon-yellow);
+        }
+        
+        .winner-message {
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow);
+            font-size: 2rem;
+            font-family: 'Bungee', cursive;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .draw-message {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            font-size: 2rem;
+            font-family: 'Bungee', cursive;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .trophy {
+            font-size: 4rem;
+            color: var(--neon-yellow);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--neon-yellow);
+        }
+        
+        .score-summary {
+            margin-top: 30px;
+        }
+        
+        .final-scores {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .final-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .final-score span:last-child {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .player-x .final-score {
+            color: var(--neon-pink);
+        }
+        
+        .player-o .final-score {
+            color: var(--neon-blue);
+        }
+        
+        .round-result {
+            color: var(--neon-blue);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .champion-message {
+            color: var(--neon-yellow);
+            text-shadow: 0 0 5px var(--neon-yellow);
+            font-size: 1.3rem;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .champion-message i {
+            font-size: 1.5rem;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--neon-yellow);
+            opacity: 0;
+        }
+        
+        .confetti:nth-child(1) {
+            left: 10%;
+            top: 0;
+            animation: confettiFall 3s ease-in 0.5s infinite;
+            background: var(--neon-pink);
+        }
+        
+        .confetti:nth-child(2) {
+            left: 20%;
+            top: -10%;
+            animation: confettiFall 3s ease-in 1s infinite;
+            background: var(--neon-blue);
+        }
+        
+        .confetti:nth-child(3) {
+            left: 30%;
+            top: 0;
+            animation: confettiFall 3s ease-in 1.5s infinite;
+            background: var(--neon-yellow);
+        }
+        
+        .confetti:nth-child(4) {
+            left: 40%;
+            top: -10%;
+            animation: confettiFall 3s ease-in 0.5s infinite;
+            background: var(--neon-purple);
+        }
+        
+        .confetti:nth-child(5) {
+            left: 50%;
+            top: 0;
+            animation: confettiFall 3s ease-in 1s infinite;
+            background: var(--neon-pink);
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 
+                    0 0 5px #fff,
+                    0 0 10px var(--neon-pink),
+                    0 0 20px var(--neon-pink);
+            }
+            to {
+                text-shadow: 
+                    0 0 10px #fff,
+                    0 0 20px var(--neon-pink),
+                    0 0 30px var(--neon-pink),
+                    0 0 40px var(--neon-pink);
+            }
+        }
+        
+        @keyframes borderGlow {
+            0% {
+                box-shadow: 
+                    0 0 5px var(--neon-pink),
+                    0 0 10px var(--neon-blue),
+                    0 0 15px var(--neon-purple);
+            }
+            50% {
+                box-shadow: 
+                    0 0 10px var(--neon-blue),
+                    0 0 20px var(--neon-purple),
+                    0 0 30px var(--neon-pink);
+            }
+            100% {
+                box-shadow: 
+                    0 0 5px var(--neon-pink),
+                    0 0 10px var(--neon-blue),
+                    0 0 15px var(--neon-purple);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(255, 45, 117, 0.5);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(255, 45, 117, 0.7);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(255, 45, 117, 0.5);
+            }
+        }
+        
+        @keyframes winnerPulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 10px currentColor;
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px currentColor;
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px currentColor;
+            }
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                opacity: 0;
+                transform: translateY(-100px) rotate(0deg);
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        @keyframes glitch {
+            0% {
+                text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-blue);
+            }
+            25% {
+                text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-blue);
+            }
+            50% {
+                text-shadow: 2px 0 var(--neon-blue), -2px 0 var(--neon-pink);
+            }
+            75% {
+                text-shadow: -2px 0 var(--neon-blue), 2px 0 var(--neon-pink);
+            }
+            100% {
+                text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-blue);
+            }
+        }
+        
+        .glitch {
+            animation: glitch 1s linear infinite;
+        }
+        
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .player-card {
+                padding: 10px;
+            }
+            
+            .avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+            }
+            
+            .player-name {
+                font-size: 1rem;
+            }
+            
+            .vs-circle {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .cell {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
+            }
+            
+            .status-message {
+                font-size: 1.2rem;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-aggressive {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .mode-selection {
+                grid-template-columns: 1fr;
+            }
+            
+            .online-players {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .online-player {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .game-title {
+                font-size: 1.8rem;
+            }
+            
+            .cell {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+            
+            .player-card {
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .player-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .vs-circle {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid game-bg py-4">
@@ -166,7 +1066,7 @@
                         
                         <div class="form-group">
                             <label for="playerName">YOUR NAME:</label>
-                            <input type="text" id="playerName" class="form-control" placeholder="Enter your name" maxlength="12">
+                            <input type="text" id="playerName" class="form-control" placeholder="Enter your name" maxlength="12" value="Player">
                         </div>
                         
                         <p class="mt-3">Share this battle link with your opponent:</p>
@@ -286,6 +1186,781 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAldVMomODBNAHFLPUnHTMmrBvFhh5VRLw",
+            authDomain: "tictactoe-tuhin.firebaseapp.com",
+            databaseURL: "https://tictactoe-tuhin-default-rtdb.firebaseio.com",
+            projectId: "tictactoe-tuhin",
+            storageBucket: "tictactoe-tuhin.firebasestorage.app",
+            messagingSenderId: "650216057490",
+            appId: "1:650216057490:web:894c54f37b2edb0219944b",
+            measurementId: "G-H24QBZ9T34"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        // Game state
+        let gameState = {
+            board: ['', '', '', '', '', '', '', '', ''],
+            currentPlayer: 'X',
+            gameMode: 'friend',
+            aiDifficulty: 'hard',
+            scores: { X: 0, O: 0 },
+            round: 1,
+            maxRounds: 5,
+            gameOver: false,
+            online: {
+                gameId: null,
+                playerSymbol: null,
+                opponentJoined: false,
+                isHost: false,
+                gameRef: null,
+                playerName: 'Player',
+                playerAvatar: 'ninja',
+                opponentName: 'Opponent',
+                opponentAvatar: 'astronaut'
+            }
+        };
+
+        // DOM elements
+        const cells = document.querySelectorAll('.cell');
+        const scoreXElement = document.getElementById('scoreX');
+        const scoreOElement = document.getElementById('scoreO');
+        const roundCountElement = document.getElementById('roundCount');
+        const gameStatusElement = document.getElementById('gameStatus');
+        const onlineStatusElement = document.getElementById('onlineStatus');
+        const newGameBtn = document.getElementById('newGameBtn');
+        const gameModeBtn = document.getElementById('gameModeBtn');
+        const onlineGameBtn = document.getElementById('onlineGameBtn');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const aiDifficultySection = document.getElementById('aiDifficulty');
+        const onlineLinkInput = document.getElementById('onlineLink');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const onlinePlayerSymbolElement = document.getElementById('onlinePlayerSymbol');
+        const onlineGameIdElement = document.getElementById('onlineGameId');
+        const onlineSetupSection = document.getElementById('onlineSetup');
+        const onlineGameInfoSection = document.getElementById('onlineGameInfo');
+        const playerNameInput = document.getElementById('playerName');
+        const avatarOptions = document.querySelectorAll('.avatar-option');
+        const playerXAvatar = document.getElementById('playerXAvatar');
+        const playerOAvatar = document.getElementById('playerOAvatar');
+        const playerXName = document.getElementById('playerXName');
+        const playerOName = document.getElementById('playerOName');
+        const onlinePlayerXAvatar = document.getElementById('onlinePlayerXAvatar');
+        const onlinePlayerOAvatar = document.getElementById('onlinePlayerOAvatar');
+        const onlinePlayerXName = document.getElementById('onlinePlayerXName');
+        const onlinePlayerOName = document.getElementById('onlinePlayerOName');
+
+        // Modals
+        const gameModeModal = new bootstrap.Modal(document.getElementById('gameModeModal'));
+        const onlineGameModal = new bootstrap.Modal(document.getElementById('onlineGameModal'));
+        const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+
+        // Initialize the game
+        function initGame() {
+            gameState.board = ['', '', '', '', '', '', '', '', ''];
+            gameState.currentPlayer = 'X';
+            gameState.gameOver = false;
+            updateBoard();
+            updateGameStatus();
+            updatePlayerDisplay();
+        }
+
+        // Update the board UI
+        function updateBoard() {
+            cells.forEach((cell, index) => {
+                cell.textContent = gameState.board[index];
+                cell.className = 'cell';
+                if (gameState.board[index] === 'X') {
+                    cell.classList.add('x');
+                } else if (gameState.board[index] === 'O') {
+                    cell.classList.add('o');
+                }
+                
+                // Remove winner class from all cells
+                cell.classList.remove('winner-cell');
+            });
+            
+            // Highlight winning cells if game is over
+            if (gameState.gameOver) {
+                const winner = checkWinner();
+                if (winner && winner !== 'draw') {
+                    const winPattern = getWinningPattern();
+                    if (winPattern) {
+                        winPattern.forEach(index => {
+                            cells[index].classList.add('winner-cell');
+                        });
+                    }
+                }
+            }
+        }
+
+        // Update game status text
+        function updateGameStatus() {
+            if (gameState.gameOver) {
+                const winner = checkWinner();
+                if (winner) {
+                    gameStatusElement.textContent = `${winner === 'X' ? gameState.online.playerXName || 'Player X' : gameState.online.playerOName || 'Player O'} WINS!`;
+                } else {
+                    gameStatusElement.textContent = "IT'S A DRAW!";
+                }
+            } else {
+                gameStatusElement.textContent = `${gameState.currentPlayer === 'X' ? gameState.online.playerXName || 'Player X' : gameState.online.playerOName || 'Player O'}'s TURN`;
+            }
+            
+            roundCountElement.textContent = `ROUND ${gameState.round}/${gameState.maxRounds}`;
+            scoreXElement.textContent = gameState.scores.X;
+            scoreOElement.textContent = gameState.scores.O;
+            
+            // Update online status
+            if (gameState.gameMode === 'online') {
+                onlineStatusElement.classList.remove('d-none');
+                if (gameState.online.opponentJoined) {
+                    onlineStatusElement.textContent = `PLAYING AS ${gameState.online.playerSymbol}`;
+                } else {
+                    onlineStatusElement.textContent = "WAITING FOR OPPONENT...";
+                }
+            } else {
+                onlineStatusElement.classList.add('d-none');
+            }
+        }
+
+        // Update player display
+        function updatePlayerDisplay() {
+            if (gameState.gameMode === 'online') {
+                playerXName.textContent = gameState.online.isHost ? gameState.online.playerName : gameState.online.opponentName;
+                playerOName.textContent = gameState.online.isHost ? gameState.online.opponentName : gameState.online.playerName;
+                
+                // Set avatars
+                const xAvatar = gameState.online.isHost ? gameState.online.playerAvatar : gameState.online.opponentAvatar;
+                const oAvatar = gameState.online.isHost ? gameState.online.opponentAvatar : gameState.online.playerAvatar;
+                
+                playerXAvatar.innerHTML = `<i class="fas fa-user-${xAvatar}"></i>`;
+                playerOAvatar.innerHTML = `<i class="fas fa-user-${oAvatar}"></i>`;
+                
+                // Update online modal display
+                onlinePlayerXName.textContent = gameState.online.playerXName || 'Player X';
+                onlinePlayerOName.textContent = gameState.online.opponentJoined ? (gameState.online.playerOName || 'Player O') : 'Waiting...';
+                
+                onlinePlayerXAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.playerAvatar}"></i>`;
+                if (gameState.online.opponentJoined) {
+                    onlinePlayerOAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.opponentAvatar}"></i>`;
+                }
+            } else {
+                playerXName.textContent = 'Player X';
+                playerOName.textContent = 'Player O';
+                playerXAvatar.innerHTML = '<i class="fas fa-user-ninja"></i>';
+                playerOAvatar.innerHTML = '<i class="fas fa-user-astronaut"></i>';
+            }
+        }
+
+        // Check for a winner and return the winning pattern
+        function getWinningPattern() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]             // diagonals
+            ];
+
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (gameState.board[a] && gameState.board[a] === gameState.board[b] && gameState.board[a] === gameState.board[c]) {
+                    return pattern;
+                }
+            }
+
+            return null;
+        }
+
+        // Check for a winner
+        function checkWinner() {
+            return getWinningPattern() ? gameState.board[getWinningPattern()[0]] : 
+                   gameState.board.includes('') ? null : 'draw';
+        }
+
+        // Handle cell click
+        function handleCellClick(e) {
+            if (gameState.gameOver) return;
+            
+            const index = parseInt(e.target.getAttribute('data-index'));
+            
+            // Check if cell is empty
+            if (gameState.board[index] !== '') return;
+            
+            // For online games, only allow moves for the current player
+            if (gameState.gameMode === 'online') {
+                if (gameState.currentPlayer !== gameState.online.playerSymbol) {
+                    console.log("Not your turn!");
+                    return;
+                }
+                if (!gameState.online.opponentJoined) {
+                    console.log("Waiting for opponent to join...");
+                    return;
+                }
+            }
+            
+            // Make the move
+            gameState.board[index] = gameState.currentPlayer;
+            updateBoard();
+            
+            // For online games, update the server
+            if (gameState.gameMode === 'online') {
+                updateOnlineGame();
+            }
+            
+            // Check for winner
+            const winner = checkWinner();
+            if (winner) {
+                handleGameOver(winner);
+            } else {
+                // Switch player
+                gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
+                updateGameStatus();
+                
+                // AI move if in AI mode and it's AI's turn
+                if (gameState.gameMode === 'ai' && gameState.currentPlayer === 'O' && !gameState.gameOver) {
+                    setTimeout(makeAIMove, 500);
+                }
+            }
+        }
+
+        // Handle game over
+        function handleGameOver(winner) {
+            gameState.gameOver = true;
+            updateGameStatus();
+            
+            // Update scores if there's a winner
+            if (winner !== 'draw') {
+                gameState.scores[winner]++;
+            }
+            
+            // Show game over modal
+            document.getElementById('finalScoreX').textContent = gameState.scores.X;
+            document.getElementById('finalScoreO').textContent = gameState.scores.O;
+            
+            const winnerCelebration = document.getElementById('winnerCelebration');
+            const drawCelebration = document.getElementById('drawCelebration');
+            
+            if (winner !== 'draw') {
+                document.getElementById('gameOverTitle').textContent = 'BATTLE RESULTS';
+                document.getElementById('gameOverMessage').textContent = `${winner === 'X' ? gameState.online.playerXName || 'PLAYER X' : gameState.online.playerOName || 'PLAYER O'} WINS!`;
+                document.getElementById('roundWinnerMessage').textContent = `ROUND ${gameState.round} VICTORY`;
+                
+                // Set winner avatar
+                const winnerAvatar = document.getElementById('winnerAvatar');
+                if (winner === 'X') {
+                    winnerAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.isHost ? gameState.online.playerAvatar : gameState.online.opponentAvatar}"></i>`;
+                } else {
+                    winnerAvatar.innerHTML = `<i class="fas fa-user-${gameState.online.isHost ? gameState.online.opponentAvatar : gameState.online.playerAvatar}"></i>`;
+                }
+                
+                winnerCelebration.classList.remove('d-none');
+                drawCelebration.classList.add('d-none');
+            } else {
+                document.getElementById('gameOverTitle').textContent = 'BATTLE RESULTS';
+                document.getElementById('roundWinnerMessage').textContent = `ROUND ${gameState.round} ENDED IN A DRAW`;
+                winnerCelebration.classList.add('d-none');
+                drawCelebration.classList.remove('d-none');
+            }
+            
+            // Check if game is completely over (3 wins)
+            if (gameState.scores.X >= 3 || gameState.scores.O >= 3 || gameState.round >= gameState.maxRounds) {
+                const gameWinner = gameState.scores.X > gameState.scores.O ? 'X' : 
+                                gameState.scores.O > gameState.scores.X ? 'O' : 'draw';
+                
+                if (gameWinner !== 'draw') {
+                    const championMessage = document.getElementById('gameWinnerMessage');
+                    championMessage.classList.remove('d-none');
+                    document.getElementById('championName').textContent = gameWinner === 'X' ? 
+                        (gameState.online.playerXName || 'PLAYER X') : 
+                        (gameState.online.playerOName || 'PLAYER O');
+                }
+            } else {
+                document.getElementById('gameWinnerMessage').classList.add('d-none');
+            }
+            
+            gameOverModal.show();
+        }
+
+        // Start a new round
+        function startNewRound() {
+            gameState.round++;
+            initGame();
+            
+            // For online games, update the server
+            if (gameState.gameMode === 'online' && gameState.online.gameId) {
+                updateOnlineGame();
+            }
+        }
+
+        // Reset the entire game
+        function resetGame() {
+            gameState.scores = { X: 0, O: 0 };
+            gameState.round = 1;
+            initGame();
+            
+            // For online games, update the server
+            if (gameState.gameMode === 'online' && gameState.online.gameId) {
+                updateOnlineGame();
+            }
+        }
+
+        // AI move logic
+        function makeAIMove() {
+            if (gameState.gameOver) return;
+            
+            let move;
+            const emptyCells = gameState.board.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
+            
+            switch (gameState.aiDifficulty) {
+                case 'easy':
+                    if (Math.random() < 0.5) {
+                        move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    } else {
+                        move = findWinningMove('O') || findWinningMove('X') || emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    }
+                    break;
+                case 'medium':
+                    if (Math.random() < 0.75) {
+                        move = findWinningMove('O') || findWinningMove('X') || emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    } else {
+                        move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    }
+                    break;
+                case 'hard':
+                    move = findBestMove();
+                    break;
+                default:
+                    move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+            
+            if (move !== undefined) {
+                gameState.board[move] = 'O';
+                updateBoard();
+                
+                const winner = checkWinner();
+                if (winner) {
+                    handleGameOver(winner);
+                } else {
+                    gameState.currentPlayer = 'X';
+                    updateGameStatus();
+                }
+            }
+        }
+
+        // Find a winning move for the given player
+        function findWinningMove(player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]             // diagonals
+            ];
+
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if ((gameState.board[a] === player && gameState.board[b] === player && gameState.board[c] === '') ||
+                    (gameState.board[a] === player && gameState.board[c] === player && gameState.board[b] === '') ||
+                    (gameState.board[b] === player && gameState.board[c] === player && gameState.board[a] === '')) {
+                    return gameState.board[a] === '' ? a : (gameState.board[b] === '' ? b : c);
+                }
+            }
+            return null;
+        }
+
+        // Minimax algorithm for hard AI
+        function findBestMove() {
+            let bestScore = -Infinity;
+            let bestMove;
+            
+            for (let i = 0; i < 9; i++) {
+                if (gameState.board[i] === '') {
+                    gameState.board[i] = 'O';
+                    const score = minimax(gameState.board, 0, false);
+                    gameState.board[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            return bestMove;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            const winner = checkWinner();
+            
+            if (winner === 'O') return 10 - depth;
+            if (winner === 'X') return depth - 10;
+            if (winner === 'draw') return 0;
+            
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        const score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        const score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        // Online game functions
+        function startOnlineGame() {
+            // Get player name and avatar
+            const playerName = playerNameInput.value.trim() || 'Player';
+            const selectedAvatar = document.querySelector('.avatar-option.selected').getAttribute('data-avatar');
+            
+            // Generate a random game ID
+            const gameId = generateGameId();
+            
+            // Update game state
+            gameState.online = {
+                gameId,
+                playerSymbol: 'X',
+                opponentJoined: false,
+                isHost: true,
+                playerName,
+                playerAvatar: selectedAvatar,
+                opponentName: 'Opponent',
+                opponentAvatar: 'astronaut',
+                playerXName: playerName,
+                playerOName: 'Waiting...',
+                gameRef: database.ref(`games/${gameId}`)
+            };
+            
+            gameState.gameMode = 'online';
+            updatePlayerDisplay();
+            
+            // Create game in Firebase
+            gameState.online.gameRef.set({
+                board: gameState.board,
+                currentPlayer: 'X',
+                playerX: true,
+                playerO: false,
+                scores: gameState.scores,
+                round: gameState.round,
+                playerXName: playerName,
+                playerXAvatar: selectedAvatar,
+                playerOName: '',
+                playerOAvatar: '',
+                lastUpdated: Date.now()
+            }).then(() => {
+                console.log('Game created successfully');
+                
+                // Set up listener for game changes
+                setupGameListener();
+                
+                // Show online game modal with correct URL
+                const gameLink = `${window.location.origin}${window.location.pathname}?game=${gameId}`;
+                onlineLinkInput.value = gameLink;
+                onlineGameIdElement.textContent = gameId;
+                onlineSetupSection.classList.remove('d-none');
+                onlineGameInfoSection.classList.add('d-none');
+                onlineGameModal.show();
+                
+                // Update UI
+                gameModeBtn.textContent = 'ONLINE';
+                gameModeBtn.innerHTML = '<i class="fas fa-globe"></i> ONLINE';
+                updateGameStatus();
+            }).catch((error) => {
+                console.error("Error creating game:", error);
+                alert("Failed to create online game. Please try again.");
+            });
+        }
+
+        function joinOnlineGame(gameId) {
+            console.log('Attempting to join game:', gameId);
+            
+            // Get player name and avatar
+            const playerName = playerNameInput.value.trim() || 'Player';
+            const selectedAvatar = document.querySelector('.avatar-option.selected').getAttribute('data-avatar');
+            
+            // Update game state
+            gameState.online = {
+                gameId,
+                playerSymbol: 'O',
+                opponentJoined: true,
+                isHost: false,
+                playerName,
+                playerAvatar: selectedAvatar,
+                gameRef: database.ref(`games/${gameId}`)
+            };
+            
+            gameState.gameMode = 'online';
+            
+            // First check if game exists and has space
+            gameState.online.gameRef.once('value').then((snapshot) => {
+                const game = snapshot.val();
+                if (!game) {
+                    alert('Game not found');
+                    window.location.href = window.location.href.split('?')[0];
+                    return;
+                }
+                
+                if (game.playerO) {
+                    alert('Game is full');
+                    window.location.href = window.location.href.split('?')[0];
+                    return;
+                }
+                
+                // Update opponent info
+                gameState.online.opponentName = game.playerXName || 'Player X';
+                gameState.online.opponentAvatar = game.playerXAvatar || 'ninja';
+                gameState.online.playerXName = game.playerXName;
+                gameState.online.playerOName = playerName;
+                
+                updatePlayerDisplay();
+                
+                // Update game to mark player O as joined
+                return gameState.online.gameRef.update({ 
+                    playerO: true,
+                    playerOName: playerName,
+                    playerOAvatar: selectedAvatar,
+                    lastUpdated: Date.now()
+                });
+            }).then(() => {
+                console.log('Successfully joined game as player O');
+                
+                // Set up listener for game changes
+                setupGameListener();
+                
+                // Show online game info
+                onlineGameIdElement.textContent = gameId;
+                onlineSetupSection.classList.add('d-none');
+                onlineGameInfoSection.classList.remove('d-none');
+                onlineGameModal.show();
+                
+                // Update UI
+                gameModeBtn.textContent = 'ONLINE';
+                gameModeBtn.innerHTML = '<i class="fas fa-globe"></i> ONLINE';
+                updateGameStatus();
+            }).catch((error) => {
+                console.error("Error joining game:", error);
+                alert("Failed to join game. Please try again.");
+                window.location.href = window.location.href.split('?')[0];
+            });
+        }
+
+        function setupGameListener() {
+            gameState.online.gameRef.on('value', snapshot => {
+                const onlineGame = snapshot.val();
+                if (!onlineGame) return;
+                
+                console.log('Game update received:', onlineGame);
+                
+                // Update opponent info if we're the host
+                if (gameState.online.isHost && onlineGame.playerO) {
+                    gameState.online.opponentName = onlineGame.playerOName || 'Player O';
+                    gameState.online.opponentAvatar = onlineGame.playerOAvatar || 'astronaut';
+                    gameState.online.playerOName = onlineGame.playerOName;
+                    
+                    if (!gameState.online.opponentJoined) {
+                        gameState.online.opponentJoined = true;
+                        document.getElementById('onlineSetup').classList.add('d-none');
+                        document.getElementById('onlineGameInfo').classList.remove('d-none');
+                        document.querySelector('.player-status').textContent = 'READY';
+                    }
+                }
+                
+                // Update game state from Firebase
+                gameState.board = [...onlineGame.board];
+                gameState.currentPlayer = onlineGame.currentPlayer;
+                gameState.scores = { ...onlineGame.scores };
+                gameState.round = onlineGame.round;
+                gameState.gameOver = false;
+                
+                updateBoard();
+                updateGameStatus();
+                updatePlayerDisplay();
+                
+                // Check for winner
+                const winner = checkWinner();
+                if (winner) {
+                    handleGameOver(winner);
+                }
+            });
+        }
+
+        function updateOnlineGame() {
+            if (!gameState.online.gameRef) return;
+            
+            const updateData = {
+                board: gameState.board,
+                currentPlayer: gameState.currentPlayer,
+                scores: gameState.scores,
+                round: gameState.round,
+                lastUpdated: Date.now()
+            };
+            
+            // If we're the host, also update player names
+            if (gameState.online.isHost) {
+                updateData.playerXName = gameState.online.playerName;
+                updateData.playerXAvatar = gameState.online.playerAvatar;
+            } else {
+                updateData.playerOName = gameState.online.playerName;
+                updateData.playerOAvatar = gameState.online.playerAvatar;
+            }
+            
+            gameState.online.gameRef.update(updateData).catch((error) => {
+                console.error("Error updating game:", error);
+            });
+        }
+
+        function generateGameId() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // Check URL for game ID to join
+        function checkUrlForGame() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('game');
+            
+            if (gameId && !gameState.online.gameId) {
+                // Show online setup modal
+                onlineGameModal.show();
+                
+                database.ref(`games/${gameId}`).once('value').then(snapshot => {
+                    if (snapshot.exists()) {
+                        const game = snapshot.val();
+                        if (!game.playerO) {
+                            // Game exists and has space, ready to join
+                            document.getElementById('onlineSetup').classList.remove('d-none');
+                            document.getElementById('onlineGameInfo').classList.add('d-none');
+                        } else {
+                            alert("This game already has two players.");
+                            window.location.href = window.location.pathname;
+                        }
+                    } else {
+                        alert("Game not found.");
+                        window.location.href = window.location.pathname;
+                    }
+                });
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Cell clicks
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+            
+            // New game button
+            newGameBtn.addEventListener('click', () => {
+                if (gameState.round >= gameState.maxRounds || gameState.scores.X >= 3 || gameState.scores.O >= 3) {
+                    resetGame();
+                } else {
+                    startNewRound();
+                }
+            });
+            
+            // Game mode button
+            gameModeBtn.addEventListener('click', () => {
+                gameModeModal.show();
+            });
+            
+            // Online game button
+            onlineGameBtn.addEventListener('click', () => {
+                if (gameState.gameMode === 'online') {
+                    onlineGameModal.show();
+                } else {
+                    // Show player name and avatar selection
+                    playerNameInput.value = 'Player';
+                    document.querySelector('.avatar-option').classList.add('selected');
+                    document.querySelectorAll('.avatar-option:not(:first-child)').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    onlineGameModal.show();
+                }
+            });
+            
+            // Mode selection
+            modeButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    gameState.gameMode = e.currentTarget.getAttribute('data-mode');
+                    gameModeBtn.textContent = e.currentTarget.querySelector('.mode-title').textContent;
+                    gameModeBtn.innerHTML = `<i class="fas ${e.currentTarget.querySelector('.mode-icon i').className.split(' ')[1]}"></i> ${e.currentTarget.querySelector('.mode-title').textContent.toUpperCase()}`;
+                    
+                    if (gameState.gameMode === 'ai') {
+                        aiDifficultySection.classList.remove('d-none');
+                    } else {
+                        aiDifficultySection.classList.add('d-none');
+                    }
+                    
+                    resetGame();
+                    gameModeModal.hide();
+                });
+            });
+            
+            // Difficulty selection
+            difficultyButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    difficultyButtons.forEach(btn => btn.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    gameState.aiDifficulty = e.currentTarget.getAttribute('data-difficulty');
+                });
+            });
+            
+            // Avatar selection
+            avatarOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    avatarOptions.forEach(opt => opt.classList.remove('selected'));
+                    e.currentTarget.classList.add('selected');
+                });
+            });
+            
+            // Copy link button
+            copyLinkBtn.addEventListener('click', () => {
+                onlineLinkInput.select();
+                document.execCommand('copy');
+                copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> COPIED!';
+                setTimeout(() => {
+                    copyLinkBtn.innerHTML = '<i class="fas fa-copy"></i> COPY';
+                }, 2000);
+            });
+            
+            // Game over modal close
+            gameOverModal._element.addEventListener('hidden.bs.modal', () => {
+                if (gameState.round >= gameState.maxRounds || gameState.scores.X >= 3 || gameState.scores.O >= 3) {
+                    resetGame();
+                } else {
+                    startNewRound();
+                }
+            });
+        }
+
+        // Initialize the game
+        function init() {
+            initGame();
+            setupEventListeners();
+            checkUrlForGame();
+        }
+
+        // Start the game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
